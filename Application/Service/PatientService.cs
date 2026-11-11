@@ -1,5 +1,6 @@
 using System.Data;
 using System.Net;
+using Application.DTOs.Patient;
 using Application.Interfaces;
 using Application.Responses;
 using Domain.Interfaces;
@@ -11,56 +12,73 @@ namespace Application.Service;
 public class PatientService(IPatientRepository patientRepository) : IPatientService
 {
     private IPatientRepository repository = patientRepository;
-    public async Task<ApiResponses<bool>> AddPatient(Patient patient)
+    public async Task<ApiResponses<bool>> AddPatient(PatientCreateDto patient)
     {
-        var con = await repository.AddPatient(patient);
-        if(con == null)
+        var pt = new Patient()
         {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "Patient can not null !!");
-        }
-        return con == true
-        ? new ApiResponses<bool>(HttpStatusCode.OK, "Patient Added !!", con)
-        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Petient not Added !!");
+            FullName = patient.FullName,
+            Phone = patient.Phone,
+            Birthdate = patient.Birthdate,
+            Isactive = patient.Isactive,
+            Createdat = patient.Createdat
+        };
+        var res = await repository.AddPatient(pt);
+        return res == true
+        ? new ApiResponses<bool>(HttpStatusCode.OK, "Patient added ")
+        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Patient not added !");
     }
 
     public async Task<ApiResponses<bool>> DeletePatient(int id)
     {
-        if(id == null || id<=0)
-        {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "ID is invalid");
-        }
         var con = await repository.DeletePatient(id);
         return con == true
         ? new ApiResponses<bool>(HttpStatusCode.OK, "Patient deleted !!", con)
         : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Petient not deleted !!");
     }
 
-    public async Task<ApiResponses<Patient>> GetPatient(int id)
+    public async Task<ApiResponses<PatientResponseDto>> GetPatient(int id)
     {
-        if(id <= 0 || id == null)
+        var res = await repository.GetPatient(id);
+        var pt = new PatientResponseDto
         {
-            return new ApiResponses<Patient>(HttpStatusCode.BadRequest, "ID is invalid !!");
-        }
-        var con = await repository.GetPatient(id);
-        return new ApiResponses<Patient>(HttpStatusCode.OK, "Patient by id.", con);
+            FullName = res.FullName,
+            Phone = res.Phone,
+            Birthdate = res.Birthdate,
+            Isactive = res.Isactive,
+            Createdat = res.Createdat
+        };
+        return new ApiResponses<PatientResponseDto>(HttpStatusCode.OK, "Patient by id. ", pt);
     }
 
-    public async Task<ApiResponses<List<Patient>>> GetPatients()
+    public async Task<ApiResponses<List<PatientResponseDto>>> GetPatients()
     {
-        var con = await repository.GetPatients();
-        return new ApiResponses<List<Patient>>(HttpStatusCode.OK, "List Patients", con);
-    }
-
-    public async Task<ApiResponses<bool>> UpdatePatient(Patient patient)
-    {
-        if(patient.Id == null || patient.Id <= 0)
+        var res = await repository.GetPatients();
+        var pt = res.Select(s => new PatientResponseDto
         {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "ID is invalid");
-        }
-        var con = await repository.AddPatient(patient);
-        return con == true
-        ? new ApiResponses<bool>(HttpStatusCode.OK, "Patient Updated !!", con)
-        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Petient not Updated !!");
+            Id = s.Id,
+            FullName = s.FullName,
+            Phone = s.Phone,
+            Birthdate = s.Birthdate,
+            Isactive = s.Isactive,
+            Createdat = s.Createdat
+        }).ToList();
+        return new ApiResponses<List<PatientResponseDto>>(HttpStatusCode.OK, "List of patient. ", pt);
     }
 
+    public async Task<ApiResponses<bool>> UpdatePatient(int id, PatientUpdateDto patient)
+    {
+        var pt = new Patient()
+        {
+            Id = id,
+            FullName = patient.FullName,
+            Phone = patient.Phone,
+            Birthdate = patient.Birthdate,
+            Isactive = patient.Isactive,
+            Createdat = patient.Createdat
+        };
+        var res = await repository.UpdatePatient(pt);
+        return res == true
+        ? new ApiResponses<bool>(HttpStatusCode.OK, "Patient updated !")
+        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Patient not updated !");
+    }
 }

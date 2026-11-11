@@ -1,3 +1,4 @@
+using Application.DTOs.Doctor;
 using Application.Interfaces;
 using Application.Responses;
 using Domain.Models;
@@ -13,32 +14,39 @@ public class DoctorController(IDoctorService doctorService) : Controller
     private IDoctorService service = doctorService;
 
     [HttpGet]
-    public async Task<ApiResponses<List<Doctor>>> GetDoctors()
+    public async Task<ApiResponses<List<DoctorResponseDto>>> GetDoctors()
     {
         return await service.GetDoctors();
     } 
+
     [HttpGet("{id:int}")]
-    public async Task<ApiResponses<Doctor>> GetDoctor(int id)
+    public async Task<ApiResponses<DoctorResponseDto>> GetDoctor(int id)
     {
         return await service.GetDoctor(id);
     } 
 
     [HttpPost]
-    public async Task<ApiResponses<bool>> AddDoctor(Doctor doctor)
+    public async Task<ApiResponses<bool>> AddDoctor(DoctorCreateDto doctor)
     {
         return await service.AddDoctor(doctor);
     }
 
-    [HttpPut]
-    public async Task<ApiResponses<bool>> UpdateDoctor(Doctor doctor)
+    [HttpPut("{id:int}")]
+    public async Task<ApiResponses<bool>> UpdateDoctor(int id, DoctorUpdateDto doctor)
     {
-        return await service.UpdateDoctor(doctor); 
+        return await service.UpdateDoctor(id, doctor); 
     }
 
 
     [HttpPatch]
-    public async Task<ApiResponses<Doctor>> PathId (int id)
+    public async Task<ApiResponses<DoctorResponseDto>> PathId (int id)
     {
         return await service.GetDoctor(id);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ApiResponses<bool>> DeleteDoctor(int id)
+    {
+        return await service.DeleteDoctor(id);
     }
 }

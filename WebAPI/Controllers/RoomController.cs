@@ -1,3 +1,4 @@
+using Application.DTOs.Room;
 using Application.Interfaces;
 using Application.Responses;
 using Domain.Models;
@@ -11,42 +12,36 @@ public class RoomsController(IRoomService roomService) : Controller
 {
     private readonly IRoomService service = roomService;
 
-    // GET /api/rooms
     [HttpGet]
-    public async Task<ApiResponses<List<Room>>> GetRooms()
+    public async Task<ApiResponses<List<RoomResponseDto>>> GetRooms()
     {
         return await service.GetRooms();
     }
 
-    // GET /api/rooms/{id}
     [HttpGet("{id:int}")]
-    public async Task<ApiResponses<Room>> GetRoom(int id)
+    public async Task<ApiResponses<RoomResponseDto>> GetRoom(int id)
     {
         return await service.GetRoom(id);
     }
 
-    // POST /api/rooms
     [HttpPost]
-    public async Task<ApiResponses<bool>> AddRoom([FromBody] Room room)
+    public async Task<ApiResponses<bool>> AddRoom(RoomCreateDto room)
     {
         return await service.AddRoom(room);
     }
 
-    // PUT /api/rooms
     [HttpPut]
-    public async Task<ApiResponses<bool>> UpdateRoom([FromBody] Room room)
+    public async Task<ApiResponses<bool>> UpdateRoom(int id, RoomUpdateDto room)
     {
-        return await service.UpdateRoom(room); 
+        return await service.UpdateRoom(id, room); 
     }
 
-    // PATCH /api/rooms/{id}/deactivate
     [HttpPatch("{id:int}/deactivate")]
-    public async Task<ApiResponses<Room>> Pathid(int id)
+    public async Task<ApiResponses<RoomResponseDto>> Pathid(int id)
     {
         return await service.GetRoom(id);
     }
 
-    // DELETE /api/rooms/{id}
     [HttpDelete("{id:int}")]
     public async Task<ApiResponses<bool>> DeleteRoom(int id)
     {

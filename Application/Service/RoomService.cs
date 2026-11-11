@@ -1,5 +1,6 @@
 using System.Data;
 using System.Net;
+using Application.DTOs.Room;
 using Application.Interfaces;
 using Application.Responses;
 using Domain.Interfaces;
@@ -11,67 +12,61 @@ public class RoomService(IRoomRepository roomRepository) : IRoomService
 {
     private readonly IRoomRepository repository = roomRepository;
 
-    public async Task<ApiResponses<bool>> AddRoom(Room room)
+    public async Task<ApiResponses<bool>> AddRoom(RoomCreateDto room)
     {
-        if (room == null)
+        var rm = new Room()
         {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "Room can't be null");
-        }
-
-        var conn = await repository.AddRoom(room);
-        return conn
-            ? new ApiResponses<bool>(HttpStatusCode.OK, "Room Added !!", conn)
-            : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Room not added !!", false);
+            Name = room.Name,
+            Isactive = room.Isactive
+        };
+        var res = await repository.AddRoom(rm);
+        return res == true
+        ? new ApiResponses<bool>(HttpStatusCode.OK, "Room added !")
+        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Room not added !");
     }
 
     public async Task<ApiResponses<bool>> DeleteRoom(int id)
     {
-        if (id <= 0)
-        {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "ID is invalid !!");
-        }
-
         var conn = await repository.DeleteRoom(id);
         return conn
             ? new ApiResponses<bool>(HttpStatusCode.OK, "Room deleted !!", conn)
             : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Room not deleted !!", false);
     }
 
-    public async Task<ApiResponses<Room>> GetRoom(int id)
+    public async Task<ApiResponses<RoomResponseDto>> GetRoom(int id)
     {
-        if (id <= 0)
+        var res = await repository.GetRoom(id);
+        var rm = new RoomResponseDto
         {
-            return new ApiResponses<Room>(HttpStatusCode.BadRequest, "ID is invalid !!");
-        }
-
-        var conn = await repository.GetRoom(id);
-        if (conn == null)
-        {
-            return new ApiResponses<Room>(HttpStatusCode.NotFound, "Room not found !!");
-        }
-
-        return new ApiResponses<Room>(HttpStatusCode.OK, "Room by id.", conn);
+            Name = res.Name,
+            Isactive = res.Isactive
+        };
+        return new ApiResponses<RoomResponseDto>(HttpStatusCode.OK, "Room by id. ", rm);
     }
 
-    public async Task<ApiResponses<List<Room>>> GetRooms()
+    public async Task<ApiResponses<List<RoomResponseDto>>> GetRooms()
     {
         var conn = await repository.GetRooms();
-        return new ApiResponses<List<Room>>(HttpStatusCode.OK, "List rooms.", conn);
-    }
-
-    public async Task<ApiResponses<bool>> UpdateRoom(Room room)
-    {
-        if (room == null)
+        var rm = conn.Select(s => new RoomResponseDto
         {
-            return new ApiResponses<bool>(HttpStatusCode.BadRequest, "Room can't be null");
-        }
-
-        // Инҷо ислоҳ шуд: ба ҷои AddRoom UpdateRoom истифода шуд
-        var conn = await repository.UpdateRoom(room);
-        return conn
-            ? new ApiResponses<bool>(HttpStatusCode.OK, "Room Updated !!", conn)
-            : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Room not updated !!", false);
+            Id = s.Id,
+            Name = s.Name,
+            Isactive = s.Isactive
+        }).ToList();
+        return new ApiResponses<List<RoomResponseDto>>(HttpStatusCode.OK, "List of room", rm);
     }
 
-
+    public async Task<ApiResponses<bool>> UpdateRoom(int id, RoomUpdateDto room)
+    {
+        var rm = new Room()
+        {
+            Id = id,
+            Name = room.Name,
+            Isactive = room.Isactive
+        };
+        var res = await repository.UpdateRoom(rm);
+        return res == true
+        ? new ApiResponses<bool>(HttpStatusCode.OK, "Room updated !")
+        : new ApiResponses<bool>(HttpStatusCode.InternalServerError, "Room not updated !");
+    }
 }

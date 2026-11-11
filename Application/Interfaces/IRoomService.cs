@@ -1,3 +1,4 @@
+using Application.DTOs.Room;
 using Application.Responses;
 using Domain.Models;
 
@@ -5,9 +6,9 @@ namespace Application.Interfaces;
 
 public interface IRoomService
 {
-    Task<ApiResponses<bool>> AddRoom(Room room);
+    Task<ApiResponses<bool>> AddRoom(RoomCreateDto room);
     Task<ApiResponses<bool>> DeleteRoom(int id);
-    Task<ApiResponses<bool>> UpdateRoom(Room room);
-    Task<ApiResponses<Room>> GetRoom(int id);
-    Task<ApiResponses<List<Room>>> GetRooms();
+    Task<ApiResponses<bool>> UpdateRoom(int id, RoomUpdateDto room);
+    Task<ApiResponses<RoomResponseDto>> GetRoom(int id);
+    Task<ApiResponses<List<RoomResponseDto>>> GetRooms();
 }
