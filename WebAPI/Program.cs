@@ -3,6 +3,7 @@ using Application.Service;
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repository;
+using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,12 +24,16 @@ builder.Services.AddScoped<IRoomService, RoomService>();
 
 var app = builder.Build();
 
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.MapControllers();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.Run();
